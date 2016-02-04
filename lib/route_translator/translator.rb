@@ -31,14 +31,16 @@ module RouteTranslator
           __send__(Translator.route_name_for(args, old_name, suffix, self), *args)
         end
 
-        add_helpers_to_test_cases(helper_container)
-      end
-    end
-
-    def self.add_helpers_to_test_cases(helper_container)
-      %w(ActionController ActionMailer ActionView).each do |klass_name|
-        next unless Module.const_defined?(klass_name)
-        klass_name.constantize::TestCase.__send__(:include, helper_container)
+        # Including the named routes helpers module
+        ActiveSupport.on_load(:action_controller) do
+          ActionController::TestCase.__send__(:include, helper_container)
+        end
+        ActiveSupport.on_load(:action_view) do
+          ActionView::TestCase.__send__(:include, helper_container)
+        end
+        ActiveSupport.on_load(:action_mailer) do
+          ActionMailer::TestCase.__send__(:include, helper_container)
+        end
       end
     end
 
