@@ -161,7 +161,7 @@ module RouteTranslator
     def self.route_name_for(args, old_name, suffix, kaller)
       args_hash           = args.detect { |arg| arg.is_a?(Hash) }
       args_locale         = host_locales_option? && args_hash && args_hash[:locale]
-      current_locale_name = I18n.locale.to_s.underscore
+      current_locale_name = I18n.locale.to_s.underscore[0...2]
 
       locale = if args_locale
                  args_locale.to_s.underscore
