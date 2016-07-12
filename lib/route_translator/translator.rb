@@ -50,6 +50,8 @@ module RouteTranslator
       shortest_first_locales = available_locales.sort_by { |locale| locale.length }
       already_seen_root = {}
       shortest_first_locales.each do |locale|
+        locale_prefix = locale.to_s.underscore[0...2]
+        already_seen_root[locale_prefix] ||= {}
         new_conditions = conditions.dup
         begin
           new_conditions[:path_info] = translate_path(conditions[:path_info], locale)
@@ -57,9 +59,9 @@ module RouteTranslator
           raise e unless RouteTranslator.config.disable_fallback
           next
         end
-        already_seen = already_seen_root[new_conditions[:path_info]]
+        already_seen = already_seen_root[locale_prefix][new_conditions[:path_info]]
         next if already_seen
-        already_seen_root[new_conditions[:path_info]] = true
+        already_seen_root[locale_prefix][new_conditions[:path_info]] = true
         new_conditions[:parsed_path_info] = ActionDispatch::Journey::Parser.new.parse(new_conditions[:path_info]) if conditions[:parsed_path_info]
         if new_conditions[:required_defaults] && !new_conditions[:required_defaults].include?(RouteTranslator.locale_param_key)
           new_conditions[:required_defaults] << RouteTranslator.locale_param_key
